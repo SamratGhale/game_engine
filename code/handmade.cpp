@@ -42,9 +42,39 @@ internal void GameOutputSound(game_sound_output_buffer *SoundBuffer,int ToneHz)
   }
 }
 
-internal void GameUpdateAndRender(game_offscreen_buffer *Buffer,int XOffset, int YOffset, game_sound_output_buffer *SoundBuffer, int ToneHz)
+internal void GameUpdateAndRender(game_memory* Memory, game_input *Input, game_offscreen_buffer *Buffer,game_sound_output_buffer *SoundBuffer)
 {
-  GameOutputSound(SoundBuffer, ToneHz);
-  RenderWeiredGradient(Buffer, XOffset, YOffset);
+  debug_read_file_result FileData = DEBUGPlatformReadEntireFile(__FILE__);
+  if(FileData.Contents){
+    DEBUGPlatformWriteEntireFile("apple.out", FileData.ContentsSize, FileData.Contents);
+    DEBUGPlatformFreeFileMemory(FileData.Contents);
+  }
+
+
+  Assert(sizeof(game_state) <= Memory->PermanentStorageSize);
+  game_state *GameState = (game_state*)Memory->PermanentStorage;
+
+
+  if(!Memory->IsInitilized){
+    GameState->XOffset = 0;
+    GameState->YOffset = 0;
+    GameState->ToneHz  = 256;
+    Memory->IsInitilized = true;
+  }
+
+  game_controller_input *Input0 = &Input->Controllers[0];
+
+  if(Input0->IsAnalog){
+    GameState->XOffset += (int)(4.0f * Input0->EndX);
+    GameState->ToneHz   = 256 + (int)(128.0f * (Input0->EndY));
+  }else{
+    //Note (samrat): Use digital movement tuning
+  }
+  if(Input0->Down.EndedDown){
+    GameState->YOffset +=1;
+  }
+
+  GameOutputSound(SoundBuffer, GameState->ToneHz);
+  RenderWeiredGradient(Buffer, GameState->XOffset, GameState->YOffset);
 }
 
