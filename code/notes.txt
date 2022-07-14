@@ -1,0 +1,22 @@
+Structure Documentations
+
+
+Code documentation
+
+Everything that happens outside the loop (Initilization phase)
+1. Register windows etc (get the window to run)
+2. Graphics backbuffer
+3. Create, initilize, clear and start playing win32_sound_output
+4. Create sound memory, game memory (Primary, Secondary etc. etc.)
+5. Init Input Structures game_memory (OldInput, NewInput)
+6. Frame rate and time variables init
+
+There is a loop in the game
+Everything that happens in the loop (Everything happens in the loop?)
+
+1. The first thing that happens is User input storing (Bit loop)
+2. First call to game code -> need to initilize game structs
+game_offscreen_buffer and game_sound_output_buffer just to call GameUpdateAndRender()
+
+
+//Variables to the soundoutput
