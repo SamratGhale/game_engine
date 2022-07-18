@@ -16,13 +16,25 @@ struct win32_window_dimention
   int Height;
 };
 
+struct win32_debug_time_marker
+{
+  DWORD OutputPlayCursor;
+  DWORD OutputWriteCursor;
+  DWORD OutputLocation;
+  DWORD OutputByteCount;
+  DWORD ExpectedFlipPlayCursor;
+
+  DWORD FlipPlayCursor;
+  DWORD FlipWriteCursor;
+};
+
 struct win32_sound_output
 {
   int SamplesPerSecond;
   int BytesPerSample;
-  int SecondaryBufferSize;
+  DWORD SecondaryBufferSize;
   u32 RunningSampleIndex;
-  int LatencySampleCount;
+  DWORD SafetyBytes;
 };
 
 #define WIN32_HANDMADE_H

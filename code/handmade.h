@@ -63,35 +63,37 @@ struct game_button_state{
 };
 
 struct game_controller_input{
+  b32 IsConnected;
   b32 IsAnalog;
 
-  f32 StartX;
-  f32 StartY;
+  f32 StickAverageX;
+  f32 StickAverageY;
 
-  f32 MinX;
-  f32 MinY;
-
-  f32 MaxX;
-  f32 MaxY;
-
-  f32 EndX;
-  f32 EndY;
 
   union{
-    game_button_state Buttons[6];
+    game_button_state Buttons[12];
     struct{
-      game_button_state Up;
-      game_button_state Down;
-      game_button_state Left;
-      game_button_state Right;
+      game_button_state MoveUp;
+      game_button_state MoveDown;
+      game_button_state MoveLeft;
+      game_button_state MoveRight;
+
+      game_button_state ActionUp;
+      game_button_state ActionDown;
+      game_button_state ActionLeft;
+      game_button_state ActionRight;
+
       game_button_state LeftShoulder;
       game_button_state RightShoulder;
+
+      game_button_state Back;
+      game_button_state Start;
     };
   };
 };
 
 struct game_input{
-  game_controller_input Controllers[4];
+  game_controller_input Controllers[5];
 };
 
 struct game_memory{
@@ -110,10 +112,17 @@ struct game_state{
   int YOffset;
 };
 
-internal void GameUpdateAndRender(game_memory *Memory, game_input * Input, game_offscreen_buffer *Buffer, game_sound_output_buffer *SoundBuffer);
+internal void GameUpdateAndRender(game_memory *Memory, game_input * Input, game_offscreen_buffer *Buffer);
+internal void GameGetSoundSamples(game_memory *Memory, game_sound_output_buffer *SoundBuffer);
 
 internal void GameOutputSound(game_sound_output_buffer *SoundBuffer, int ToneHz);
 internal void RenderWeiredGradient(game_offscreen_buffer *Buffer, int XOffset, int YOffset);
+
+inline game_controller_input * GetController(game_input *Input, int ControllerIndex){
+  Assert(ControllerIndex < ArrayCount(Input->Controllers));
+  game_controller_input *Result = &Input->Controllers[ControllerIndex];
+  return Result;
+}
 
 #define HANDMADE_H
 #endif
