@@ -21,11 +21,35 @@ internal void RenderWeiredGradient(game_offscreen_buffer *Buffer, int XOffset, i
     Row += Buffer->Pitch;
   }
 }
+internal void RenderPlayer(game_offscreen_buffer * Buffer, int PlayerX, int PlayerY){
+  u8 * EndOfBuffer = ((u8*)Buffer->Memory + Buffer->Pitch * Buffer->Height);
 
-internal void GameOutputSound(game_sound_output_buffer *SoundBuffer,int ToneHz)
+  u32 Color  = 0xFFFFFFFF;
+  int Left   = PlayerX;
+  int Right  = PlayerX + 10;
+
+  int Top    = PlayerY;
+  int Bottom = PlayerY + 10;
+
+  for(int x = Left; x < Right; ++x){
+    u8 * Pixel = ((u8 *)Buffer->Memory + x * Buffer->BytesPerPixel + Top * Buffer->Pitch);
+
+    for(int y = Top; y < Bottom; ++y){
+
+      //Clamping
+      if((Pixel >= Buffer->Memory) && (Pixel < EndOfBuffer)){
+
+	*(u32*)Pixel = Color;
+	Pixel += Buffer->Pitch;
+      }
+
+    }
+  }
+}
+
+void GameOutputSound(game_state *GameState, game_sound_output_buffer *SoundBuffer,int ToneHz)
 {
 
-  local_persist f32 tSine;
   s16 ToneVolume = 10000;
   int WavePeriod = SoundBuffer->SamplesPerSecond / ToneHz;
 
@@ -35,24 +59,27 @@ internal void GameOutputSound(game_sound_output_buffer *SoundBuffer,int ToneHz)
        SampleIndex < SoundBuffer->SampleCount;
        ++SampleIndex)
     {
-      f32 SineValue = sinf(tSine);
+      f32 SineValue = sinf(GameState->tSine);
       s16 SampleValue = (s16)(SineValue * ToneVolume);
       *SampleOut++ = SampleValue;
       *SampleOut++ = SampleValue;
-      tSine += (2.0f * Pi32 * 1.0f) / (f32)WavePeriod;
+      GameState->tSine += (2.0f * Pi32 * 1.0f) / (f32)WavePeriod;
 
-      if(tSine > 2.0f * Pi32){
-	tSine -= 2.0f * Pi32;
+      if(GameState->tSine > 2.0f * Pi32){
+	GameState->tSine -= 2.0f * Pi32;
       }
     }
 }
 
-internal void GameUpdateAndRender(game_memory* Memory, game_input *Input, game_offscreen_buffer *Buffer)
+#if defined __cplusplus
+extern "C"
+#endif
+GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 {
-  debug_read_file_result FileData = DEBUGPlatformReadEntireFile(__FILE__);
+  debug_read_file_result FileData = Memory->DEBUGPlatformReadEntireFile(Thread, __FILE__);
   if(FileData.Contents){
-    DEBUGPlatformWriteEntireFile("apple.out", FileData.ContentsSize, FileData.Contents);
-    DEBUGPlatformFreeFileMemory(FileData.Contents);
+    Memory->DEBUGPlatformWriteEntireFile(Thread, "apple.out", FileData.ContentsSize, FileData.Contents);
+    Memory->DEBUGPlatformFreeFileMemory(Thread, FileData.Contents);
   }
 
 
@@ -64,6 +91,9 @@ internal void GameUpdateAndRender(game_memory* Memory, game_input *Input, game_o
     GameState->XOffset = 0;
     GameState->YOffset = 0;
     GameState->ToneHz  = 256;
+
+    GameState->PlayerX = 100;
+    GameState->PlayerY = 100;
     Memory->IsInitilized = true;
   }
 
@@ -97,13 +127,31 @@ internal void GameUpdateAndRender(game_memory* Memory, game_input *Input, game_o
 	{
 	  GameState->YOffset += 1;
 	}
+      GameState->PlayerX +=(int)(4.0f * Controller->StickAverageX);
+      GameState->PlayerY -=(int)(4.0f * Controller->StickAverageY);
+
+      if(GameState->tJump > 0){
+	GameState->PlayerY += (int)(10.0f * sinf(0.5f * Pi32 * GameState->tJump));
+      }
+
+      if(Controller->ActionDown.EndedDown){
+	GameState->tJump = 4.0f;
+      }
+      GameState->tJump -= 0.33f;
     }
 
   RenderWeiredGradient(Buffer, GameState->XOffset, GameState->YOffset);
+  RenderPlayer(Buffer, GameState->PlayerX, GameState->PlayerY);
+
+  if(Input->MouseButtons[0].EndedDown){
+    RenderPlayer(Buffer, Input->MouseX , Input->MouseY);
+  }
 }
 
-internal void GameGetSoundSamples(game_memory *Memory, game_sound_output_buffer *SoundBuffer){
+#if defined __cplusplus
+extern "C"
+#endif
+GAME_GET_SOUND_SAMPLES(GameGetSoundSamples){
   game_state *GameState = (game_state*)Memory->PermanentStorage;
-  GameOutputSound(SoundBuffer, GameState->ToneHz);
+  GameOutputSound(GameState,SoundBuffer, GameState->ToneHz);
 }
-
