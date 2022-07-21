@@ -174,11 +174,6 @@ void GameOutputSound(game_state* gameState, game_sound_output_buffer *SoundBuffe
 internal void RenderWeiredGradient(game_offscreen_buffer *Buffer, int XOffset, int YOffset);
 internal void RenderWeiredGradient(game_offscreen_buffer *Buffer, int PlayerX, int PlayerY);
 
-game_controller_input * GetController(game_input *Input, int ControllerIndex){
-  Assert(ControllerIndex < ArrayCount(Input->Controllers));
-  game_controller_input *Result = &Input->Controllers[ControllerIndex];
-  return Result;
-}
 
 #define HANDMADE_H
 #endif
