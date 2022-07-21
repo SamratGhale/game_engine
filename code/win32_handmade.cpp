@@ -35,6 +35,9 @@ global_variable s64 GlobalPerfCountFrequency;
 UINT DesiredSchedularMS = 1;
 b32 SleepIsGrandular = (timeBeginPeriod(DesiredSchedularMS) == TIMERR_NOERROR);
 
+// Constant values that tells us how many increments does the clock goes thru each second
+global_variable s64 GlobalPerfCountFrequency;
+
 /**
  * XINPUT
 
@@ -276,6 +279,24 @@ internal void Win32ProcessXInputDigitalButton(DWORD XInputButtonState,
 {
   NewState->EndedDown = ((XInputButtonState & ButtonBit) == ButtonBit);
   NewState->HalfTransitionCount = (OldState->EndedDown != NewState->EndedDown) ? 1 : 0;
+}
+
+internal void Win32ProcessKeyboardMessage(game_button_state * NewState, b32 IsDown){
+  NewState->EndedDown = IsDown;
+  ++NewState->HalfTransitionCount;
+}
+
+internal f32 Win32ProcessXInputStickValue(SHORT Value, SHORT DeadZoneThreshold){
+  /** Normalize by adding or subtracting DeadZoneThreshold **/
+
+  f32 Result = 0;
+  if(Value < -DeadZoneThreshold){
+    Result = (f32)((Value + DeadZoneThreshold) / (32768.0f - DeadZoneThreshold));
+
+  }else if(Value > DeadZoneThreshold){
+    Result = (f32)((Value - DeadZoneThreshold) / (32767.0f - DeadZoneThreshold));
+  }
+  return (Result);
 }
 					      
 
@@ -550,7 +571,6 @@ Win32ProcessXInputStickValue(SHORT Value, SHORT DeadZoneThreshold){
   }else if(Value > DeadZoneThreshold){
     Result = (f32)(Value - DeadZoneThreshold) /(23767.0f - DeadZoneThreshold);
   }
-  return Result;
 }
 
 internal void Win32GetInputFileLocation(win32_state *State,
@@ -940,6 +960,10 @@ WinMain(HINSTANCE Instance,
 #else
 	  LPVOID BaseAddress = 0;
 #endif
+	  game_memory GameMemory = {};
+	  GameMemory.PermanentStorageSize = Megabytes(64);
+	  GameMemory.TransientStorageSize = Gigabytes(2);
+	  u64 TotalStorageSize = GameMemory.PermanentStorageSize + GameMemory.TransientStorageSize;
 
 
 	  game_memory GameMemory = {};

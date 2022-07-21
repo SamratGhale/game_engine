@@ -104,7 +104,6 @@ struct game_controller_input{
   f32 StickAverageX;
   f32 StickAverageY;
 
-
   union{
     game_button_state Buttons[12];
     struct{
@@ -132,6 +131,12 @@ struct game_input{
   s32 MouseX, MouseY, MouseZ;
   game_controller_input Controllers[5];
 };
+
+inline game_controller_input *GetController(game_input *Input, int ControllerIndex){
+  Assert(ControllerIndex < ArrayCount(Input->Controllers));
+  game_controller_input *Result = &Input->Controllers[ControllerIndex];
+  return (Result);
+}
 
 struct game_memory{
   u64 PermanentStorageSize;

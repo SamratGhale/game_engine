@@ -3,11 +3,11 @@
 struct win32_offscreen_buffer
 {
   BITMAPINFO Info;
-  void *Memory;
-  int Pitch;
-  int Width;
-  int Height;
-  int BytesPerPixel;
+  void* Memory;
+  int   Pitch;
+  int   Width;
+  int   Height;
+  int   BytesPerPixel;
 };
 
 struct win32_window_dimention
