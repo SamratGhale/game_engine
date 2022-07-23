@@ -1,3 +1,6 @@
-There is a loop
-
-There is a while loop
+Short introduction about the game engine and it's concepts
+Where the engine is at
+Game code and platform code
+platform code libraries used
+Rendering tecqniques (Memory stuffs)
+Replay features. Debug features
