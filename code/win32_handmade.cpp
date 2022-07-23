@@ -466,6 +466,11 @@ internal void Win32DisplayBufferInWindow(win32_offscreen_buffer *Buffer,
 
   int OffsetX = 10;
   int OffsetY = 10;
+  PatBlt(DeviceContext, 0, 0, WindowWidth, OffsetY, BLACKNESS);
+  PatBlt(DeviceContext, 0, OffsetY + Buffer->Height, WindowWidth, WindowHeight, BLACKNESS);
+  PatBlt(DeviceContext, 0, 0, OffsetX , WindowHeight, BLACKNESS);
+  PatBlt(DeviceContext, OffsetX + Buffer->Width, 0, WindowWidth, WindowHeight, BLACKNESS);
+
   StretchDIBits(DeviceContext,
 		OffsetX , OffsetY, Buffer->Width, Buffer->Height,
 		0, 0, Buffer->Width, Buffer->Height,
@@ -512,7 +517,6 @@ Win32MainWindowCallback(HWND Window,
 
 	win32_window_dimention Dimention = Win32GetWindowDimention(Window);
 
-	PatBlt(DeviceContext, 0, 0, Dimention.Width, Dimention.Height, BLACKNESS);
 	Win32DisplayBufferInWindow(&GlobalBackbuffer, DeviceContext, Dimention.Width, Dimention.Height);
 
 	EndPaint(Window, &Paint);
