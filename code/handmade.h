@@ -4,7 +4,6 @@
   Note(sarmat): Custom compiler flags
   HANDMADE_INTERNAL:
   0 - Build for public release
-  1 - Build for developer only
 
   HANDMADE_SLOW:
   0 - No Slow code allowed
@@ -139,6 +138,46 @@ inline game_controller_input *GetController(game_input *Input, int ControllerInd
   return (Result);
 }
 
+struct tile_map{
+  u32 * Tiles;
+};
+
+struct canonical_position{
+  s32 TileX;
+  s32 TileY;
+  
+  s32 TileMapX;
+  s32 TileMapY;
+  // Realative to tile
+  f32 X;
+  f32 Y;
+};
+
+struct raw_position{
+  s32 TileMapX; //In which tile_map of the world you are in
+  s32 TileMapY;
+  //Relative to tile-map
+  f32 X;
+  f32 Y;
+};
+
+struct world{
+  //TODO: Begginer's tilemap
+  s32 CountX;
+  s32 CountY;
+
+  f32 UpperLeftX;
+  f32 UpperLeftY;
+  f32 TileHeight;
+  f32 TileWidth;
+
+  s32 TileMapCountX;
+  s32 TileMapCountY;
+
+  tile_map * Tiles;
+};
+
+
 struct game_memory{
   u64 PermanentStorageSize;
   void * PermanentStorage; //Note(samrat): Required to be cleared to zero startup
@@ -154,6 +193,9 @@ struct game_memory{
 };
 
 struct game_state{
+  u32 PlayerTileMapX;
+  u32 PlayerTileMapY;
+
   f32 PlayerX;
   f32 PlayerY;
 };
